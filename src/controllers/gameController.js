@@ -3,7 +3,8 @@
  * Handles game-related operations
  */
 
-import { Game, GameScore, GameRating } from '../models/index.js';
+import { Game, GameScore, GameRating, GameSession, GameSave } from '../models/index.js';
+import { withTransaction, formatDatabaseError } from '../db/utilities.js';
 
 /**
  * Get all enabled games
@@ -290,6 +291,259 @@ export const listGameRatings = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: 'An error occurred while fetching game ratings',
+    });
+  }
+};
+
+/**
+ * Save current game state for an authenticated user
+ * POST /games/:slug/saves
+ */
+export const saveGameState = async (req, res) => {
+  try {
+    const { slug } = req.params;
+    const { gameState, saveName } = req.body || {};
+
+    if (!slug) {
+      return res.status(400).json({
+        success: false,
+        message: 'Game slug is required',
+      });
+    }
+
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required',
+      });
+    }
+
+    if (!gameState || typeof gameState !== 'object') {
+      return res.status(400).json({
+        success: false,
+        message: 'gameState is required and must be an object',
+      });
+    }
+
+    const game = await Game.findBySlug(slug);
+
+    if (!game) {
+      return res.status(404).json({
+        success: false,
+        message: 'Game not found',
+      });
+    }
+
+    const userId = req.user.id;
+    const gameId = game.id;
+    const MAX_SAVES_PER_GAME = 5;
+
+    const result = await withTransaction(async (trx) => {
+      // Ensure we have an in-progress session for this user & game
+      let session = await GameSession.findActiveByUserAndGame(userId, gameId, trx);
+      if (!session) {
+        session = await GameSession.createFromState(
+          {
+            userId,
+            gameId,
+            gameState,
+          },
+          trx,
+        );
+      } else {
+        session = await GameSession.updateState(session.id, gameState, trx);
+      }
+
+      // Always keep only the latest save per user and game:
+      // delete previous saves before creating a new one
+      await GameSave.deleteByUserAndGame(userId, gameId, trx);
+
+      const name =
+        typeof saveName === 'string' && saveName.trim().length > 0
+          ? saveName.trim()
+          : `Save - ${new Date().toLocaleString()}`;
+
+      const save = await GameSave.createSave(
+        {
+          sessionId: session.id,
+          userId,
+          gameState,
+          saveName: name,
+        },
+        trx,
+      );
+
+      return {
+        type: 'ok',
+        payload: { session, save },
+      };
+    });
+
+    return res.status(201).json({
+      success: true,
+      data: {
+        session: result.payload.session,
+        save: result.payload.save,
+      },
+    });
+  } catch (error) {
+    console.error('Save game state error:', error);
+    const formatted = formatDatabaseError(error);
+    return res.status(500).json({
+      success: false,
+      message: formatted.message || 'An error occurred while saving game state',
+    });
+  }
+};
+
+/**
+ * List saved games for the authenticated user and given game
+ * GET /games/:slug/saves
+ */
+export const listGameSaves = async (req, res) => {
+  try {
+    const { slug } = req.params;
+
+    if (!slug) {
+      return res.status(400).json({
+        success: false,
+        message: 'Game slug is required',
+      });
+    }
+
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required',
+      });
+    }
+
+    const game = await Game.findBySlug(slug);
+
+    if (!game) {
+      return res.status(404).json({
+        success: false,
+        message: 'Game not found',
+      });
+    }
+
+    const saves = await GameSave.listByUserAndGame(req.user.id, game.id);
+
+    return res.status(200).json({
+      success: true,
+      data: saves,
+    });
+  } catch (error) {
+    console.error('List game saves error:', error);
+    const formatted = formatDatabaseError(error);
+    return res.status(500).json({
+      success: false,
+      message: formatted.message || 'An error occurred while listing game saves',
+    });
+  }
+};
+
+/**
+ * Load a saved game for the authenticated user
+ * GET /games/:slug/saves/:saveId
+ */
+export const loadGameSave = async (req, res) => {
+  try {
+    const { slug, saveId } = req.params;
+
+    if (!slug || !saveId) {
+      return res.status(400).json({
+        success: false,
+        message: 'Game slug and saveId are required',
+      });
+    }
+
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required',
+      });
+    }
+
+    const game = await Game.findBySlug(slug);
+
+    if (!game) {
+      return res.status(404).json({
+        success: false,
+        message: 'Game not found',
+      });
+    }
+
+    const save = await GameSave.findByIdForUserAndGame(saveId, req.user.id, game.id);
+
+    if (!save) {
+      return res.status(404).json({
+        success: false,
+        message: 'Saved game not found',
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: {
+        id: save.id,
+        session_id: save.session_id,
+        save_name: save.save_name,
+        created_at: save.created_at,
+        updated_at: save.updated_at,
+        game_state: save.game_state,
+      },
+    });
+  } catch (error) {
+    console.error('Load game save error:', error);
+    const formatted = formatDatabaseError(error);
+    return res.status(500).json({
+      success: false,
+      message: formatted.message || 'An error occurred while loading saved game',
+    });
+  }
+};
+
+/**
+ * Clear all saved games for the authenticated user and given game
+ * DELETE /games/:slug/saves
+ */
+export const clearGameSaves = async (req, res) => {
+  try {
+    const { slug } = req.params;
+
+    if (!slug) {
+      return res.status(400).json({
+        success: false,
+        message: 'Game slug is required',
+      });
+    }
+
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        success: false,
+        message: 'Authentication required',
+      });
+    }
+
+    const game = await Game.findBySlug(slug);
+
+    if (!game) {
+      return res.status(404).json({
+        success: false,
+        message: 'Game not found',
+      });
+    }
+
+    await GameSave.deleteByUserAndGame(req.user.id, game.id);
+
+    return res.status(204).send();
+  } catch (error) {
+    console.error('Clear game saves error:', error);
+    const formatted = formatDatabaseError(error);
+    return res.status(500).json({
+      success: false,
+      message: formatted.message || 'An error occurred while clearing game saves',
     });
   }
 };

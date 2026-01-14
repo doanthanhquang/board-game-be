@@ -11,6 +11,10 @@ import {
   getGameRanking,
   createGameRating,
   listGameRatings,
+  saveGameState,
+  listGameSaves,
+  loadGameSave,
+  clearGameSaves,
 } from '../controllers/gameController.js';
 import { authenticate, validateBodyNotEmpty } from '../middleware/index.js';
 
@@ -49,6 +53,35 @@ router.post(
 router.get(
   '/:slug/ratings',
   listGameRatings,
+);
+
+// POST /games/:slug/saves - Save current game state
+router.post(
+  '/:slug/saves',
+  authenticate,
+  validateBodyNotEmpty,
+  saveGameState,
+);
+
+// GET /games/:slug/saves - List saved games for current user
+router.get(
+  '/:slug/saves',
+  authenticate,
+  listGameSaves,
+);
+
+// GET /games/:slug/saves/:saveId - Load a specific saved game
+router.get(
+  '/:slug/saves/:saveId',
+  authenticate,
+  loadGameSave,
+);
+
+// DELETE /games/:slug/saves - Clear all saves for current user and game
+router.delete(
+  '/:slug/saves',
+  authenticate,
+  clearGameSaves,
 );
 
 export default router;
