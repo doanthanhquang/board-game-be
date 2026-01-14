@@ -38,7 +38,7 @@ class GameScore {
    * Default sort is by minimal moves_count; can be overridden by sort parameter.
    * @param {string} gameId
    * @param {number} [limit=50]
-   * @param {string} [sort='best_moves'] - 'best_moves' | 'wins'
+   * @param {string} [sort='best_moves'] - 'best_moves' | 'wins' | 'best_score'
    * @returns {Promise<Array>}
    */
   static async getGlobalRanking(gameId, limit = 50, sort = 'best_moves') {
@@ -51,12 +51,15 @@ class GameScore {
         'u.id as user_id',
         'u.username',
         db.raw('MIN(gs.moves_count) as best_moves'),
+        db.raw('MAX(gs.score) as best_score'),
         db.raw('COUNT(gs.id) as wins'),
         db.raw('MAX(gs.created_at) as last_win_at'),
       );
 
     if (sort === 'wins') {
       query = query.orderBy('wins', 'desc').orderBy('last_win_at', 'desc');
+    } else if (sort === 'best_score') {
+      query = query.orderBy('best_score', 'desc').orderBy('last_win_at', 'desc');
     } else {
       query = query.orderBy('best_moves', 'asc').orderBy('last_win_at', 'desc');
     }
@@ -77,7 +80,7 @@ class GameScore {
    * @param {string} gameId
    * @param {string} userId
    * @param {number} [limit=50]
-   * @param {string} [sort='best_moves'] - 'best_moves' | 'wins'
+   * @param {string} [sort='best_moves'] - 'best_moves' | 'wins' | 'best_score'
    * @returns {Promise<Array>}
    */
   static async getFriendsRanking(gameId, userId, limit = 50, sort = 'best_moves') {
@@ -106,12 +109,15 @@ class GameScore {
         'u.id as user_id',
         'u.username',
         db.raw('MIN(gs.moves_count) as best_moves'),
+        db.raw('MAX(gs.score) as best_score'),
         db.raw('COUNT(gs.id) as wins'),
         db.raw('MAX(gs.created_at) as last_win_at'),
       );
 
     if (sort === 'wins') {
       query = query.orderBy('wins', 'desc').orderBy('last_win_at', 'desc');
+    } else if (sort === 'best_score') {
+      query = query.orderBy('best_score', 'desc').orderBy('last_win_at', 'desc');
     } else {
       query = query.orderBy('best_moves', 'asc').orderBy('last_win_at', 'desc');
     }
