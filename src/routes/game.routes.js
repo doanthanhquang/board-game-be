@@ -4,7 +4,14 @@
  */
 
 import express from 'express';
-import { getGames, getGameBySlug, recordGameScore, getGameRanking } from '../controllers/gameController.js';
+import {
+  getGames,
+  getGameBySlug,
+  recordGameScore,
+  getGameRanking,
+  createGameRating,
+  listGameRatings,
+} from '../controllers/gameController.js';
 import { authenticate, validateBodyNotEmpty } from '../middleware/index.js';
 
 const router = express.Router();
@@ -28,6 +35,20 @@ router.get(
   '/:slug/rankings',
   authenticate,
   getGameRanking,
+);
+
+// POST /games/:slug/ratings - Create or update rating and comment
+router.post(
+  '/:slug/ratings',
+  authenticate,
+  validateBodyNotEmpty,
+  createGameRating,
+);
+
+// GET /games/:slug/ratings - List ratings and comments with pagination
+router.get(
+  '/:slug/ratings',
+  listGameRatings,
 );
 
 export default router;
