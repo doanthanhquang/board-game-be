@@ -29,6 +29,11 @@ export default {
       extension: "js",
       loadExtensions: [".js"],
     },
+    seeds: {
+      directory: "./src/db/seeds",
+      extension: "js",
+      loadExtensions: [".js"],
+    },
     debug: process.env.NODE_ENV === "development",
   },
 
@@ -42,6 +47,11 @@ export default {
     migrations: {
       directory: "./src/db/migrations",
       tableName: "knex_migrations",
+      extension: "js",
+      loadExtensions: [".js"],
+    },
+    seeds: {
+      directory: "./src/db/seeds",
       extension: "js",
       loadExtensions: [".js"],
     },
