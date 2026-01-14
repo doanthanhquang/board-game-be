@@ -1,15 +1,6 @@
-/**
- * Application Entry Point
- * Starts the Express server with database connection
- */
-
-import dotenv from 'dotenv';
 import app from './app.js';
 import { serverConfig } from './config/index.js';
 import { testConnection, closeConnection } from './db/index.js';
-
-// Load environment variables
-dotenv.config();
 
 /**
  * Initialize database connection with retry logic

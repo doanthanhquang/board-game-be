@@ -20,7 +20,25 @@ export const testConnection = async () => {
     await db.raw('SELECT 1');
     return true;
   } catch (error) {
-    console.error('Database connection test failed:', error.message);
+    console.error('❌ Database connection test failed:', error.message);
+    console.error('Error code:', error.code);
+    console.error('Error details:', error.detail || 'No additional details');
+    
+    // Log connection config (without password)
+    const config = db.client.config.connection;
+    if (typeof config === 'string') {
+      // Connection string - hide password
+      const safeUrl = config.replace(/:([^:@]+)@/, ':****@');
+      console.error('Connection string:', safeUrl);
+    } else if (config) {
+      console.error('Connection config:', {
+        host: config.host,
+        port: config.port,
+        database: config.database,
+        user: config.user,
+        ssl: config.ssl ? 'enabled' : 'disabled',
+      });
+    }
     return false;
   }
 };

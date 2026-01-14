@@ -53,14 +53,6 @@ NODE_ENV=development
 # CORS Configuration  
 CORS_ORIGIN=*
 
-# Supabase Database Configuration
-SUPABASE_DB_HOST=db.xxxxx.supabase.co
-SUPABASE_DB_PORT=5432
-SUPABASE_DB_NAME=postgres
-SUPABASE_DB_USER=postgres
-SUPABASE_DB_PASSWORD=your-password
-SUPABASE_DB_SSL=true
-
 # Or use connection string (alternative)
 # DATABASE_URL=postgresql://postgres:password@db.xxxxx.supabase.co:5432/postgres
 ```

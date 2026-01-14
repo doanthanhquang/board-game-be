@@ -1,14 +1,4 @@
 /**
- * Knex Configuration File
- * Defines database connection settings for different environments
- */
-
-import dotenv from "dotenv";
-
-// Load environment variables
-dotenv.config();
-
-/**
  * Get database configuration from environment variables
  */
 const getDbConfig = () => {

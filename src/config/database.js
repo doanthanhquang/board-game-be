@@ -1,14 +1,6 @@
-/**
- * Database Configuration
- * Manages database connection settings for Knex.js
- */
-
-/**
- * Get database configuration from environment variables
- * Supports both connection string and individual parameters
- */
 export const getDatabaseConfig = () => {
   // Support connection string (DATABASE_URL)
+  console.log("DATABASE_URL", process.env.DATABASE_URL);
   if (process.env.DATABASE_URL) {
     return {
       client: 'pg',
