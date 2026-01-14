@@ -11,6 +11,7 @@ import {
   validateId,
   sanitizeInput,
 } from './validator.js';
+import { authenticate } from './auth.js';
 
 export {
   // Error handling
@@ -25,4 +26,6 @@ export {
   validateBodyNotEmpty,
   validateId,
   sanitizeInput,
+  // Auth
+  authenticate,
 };
