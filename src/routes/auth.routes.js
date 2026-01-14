@@ -4,7 +4,7 @@
  */
 
 import express from 'express';
-import { login } from '../controllers/authController.js';
+import { login, register } from '../controllers/authController.js';
 
 const router = express.Router();
 
@@ -13,5 +13,11 @@ const router = express.Router();
  * Login user with email/username and password
  */
 router.post('/login', login);
+
+/**
+ * POST /api/auth/register
+ * Register a new client user
+ */
+router.post('/register', register);
 
 export default router;

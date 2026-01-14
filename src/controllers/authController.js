@@ -80,3 +80,82 @@ export const login = async (req, res) => {
     });
   }
 };
+
+/**
+ * Register client user
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+export const register = async (req, res) => {
+  try {
+    const { email, username, password } = req.body || {};
+
+    // Basic required field validation
+    if (!email || !username || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email, username and password are required',
+      });
+    }
+
+    // Email format validation
+    const emailRegex = /\S+@\S+\.\S+/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid email format',
+      });
+    }
+
+    // Password minimum length
+    if (typeof password !== 'string' || password.length < 8) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 8 characters long',
+      });
+    }
+
+    // Check for existing email
+    const existingByEmail = await User.findByEmail(email);
+    if (existingByEmail) {
+      return res.status(409).json({
+        success: false,
+        message: 'Email is already in use',
+      });
+    }
+
+    // Check for existing username
+    const existingByUsername = await User.findByUsername(username);
+    if (existingByUsername) {
+      return res.status(409).json({
+        success: false,
+        message: 'Username is already in use',
+      });
+    }
+
+    // Hash password
+    const passwordHash = await bcrypt.hash(password, 10);
+
+    // Create client user (role defaults to client, is_active defaults to true)
+    const createdUser = await User.create({
+      email,
+      username,
+      password_hash: passwordHash,
+      role: 'client',
+      is_active: true,
+    });
+
+    const sanitizedUser = User.sanitize(createdUser);
+
+    return res.status(201).json({
+      success: true,
+      user: sanitizedUser,
+    });
+  } catch (error) {
+    console.error('Register error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred during registration',
+    });
+  }
+};
