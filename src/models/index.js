@@ -4,5 +4,6 @@
  */
 
 import { BaseModel } from './BaseModel.js';
+import User from './User.js';
 
-export { BaseModel };
+export { BaseModel, User };
