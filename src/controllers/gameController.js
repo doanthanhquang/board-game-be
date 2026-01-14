@@ -141,12 +141,12 @@ export const recordGameScore = async (req, res) => {
 
 /**
  * Get rankings for a game
- * GET /games/:slug/rankings?scope=global|friends
+ * GET /games/:slug/rankings?scope=global|friends&sort=best_moves|wins
  */
 export const getGameRanking = async (req, res) => {
   try {
     const { slug } = req.params;
-    const { scope = 'global' } = req.query;
+    const { scope = 'global', sort = 'best_moves' } = req.query;
 
     if (!slug) {
       return res.status(400).json({
@@ -173,9 +173,9 @@ export const getGameRanking = async (req, res) => {
           message: 'Authentication required for friends ranking',
         });
       }
-      rankings = await GameScore.getFriendsRanking(game.id, req.user.id);
+      rankings = await GameScore.getFriendsRanking(game.id, req.user.id, undefined, sort);
     } else {
-      rankings = await GameScore.getGlobalRanking(game.id);
+      rankings = await GameScore.getGlobalRanking(game.id, undefined, sort);
     }
 
     return res.status(200).json({

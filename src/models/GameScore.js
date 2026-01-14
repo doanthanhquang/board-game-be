@@ -34,13 +34,15 @@ class GameScore {
   }
 
   /**
-   * Get global ranking for a game based on minimal moves_count
+   * Get global ranking for a game.
+   * Default sort is by minimal moves_count; can be overridden by sort parameter.
    * @param {string} gameId
    * @param {number} [limit=50]
+   * @param {string} [sort='best_moves'] - 'best_moves' | 'wins'
    * @returns {Promise<Array>}
    */
-  static async getGlobalRanking(gameId, limit = 50) {
-    const rows = await db('game_scores as gs')
+  static async getGlobalRanking(gameId, limit = 50, sort = 'best_moves') {
+    let query = db('game_scores as gs')
       .join('users as u', 'gs.user_id', 'u.id')
       .where('gs.game_id', gameId)
       .andWhere('gs.result', 'win')
@@ -51,10 +53,15 @@ class GameScore {
         db.raw('MIN(gs.moves_count) as best_moves'),
         db.raw('COUNT(gs.id) as wins'),
         db.raw('MAX(gs.created_at) as last_win_at'),
-      )
-      .orderBy('best_moves', 'asc')
-      .orderBy('last_win_at', 'desc')
-      .limit(limit);
+      );
+
+    if (sort === 'wins') {
+      query = query.orderBy('wins', 'desc').orderBy('last_win_at', 'desc');
+    } else {
+      query = query.orderBy('best_moves', 'asc').orderBy('last_win_at', 'desc');
+    }
+
+    const rows = await query.limit(limit);
 
     // Add rank index
     return rows.map((row, index) => ({
@@ -64,14 +71,16 @@ class GameScore {
   }
 
   /**
-   * Get friends-only ranking for a game based on minimal moves_count
+   * Get friends-only ranking for a game.
+   * Default sort is by minimal moves_count; can be overridden by sort parameter.
    * Includes the current user in the results.
    * @param {string} gameId
    * @param {string} userId
    * @param {number} [limit=50]
+   * @param {string} [sort='best_moves'] - 'best_moves' | 'wins'
    * @returns {Promise<Array>}
    */
-  static async getFriendsRanking(gameId, userId, limit = 50) {
+  static async getFriendsRanking(gameId, userId, limit = 50, sort = 'best_moves') {
     // Subquery to get friend ids (bidirectional)
     const friendIdsQuery = db('friendships')
       .where('status', 'accepted')
@@ -85,7 +94,7 @@ class GameScore {
         ),
       );
 
-    const rows = await db('game_scores as gs')
+    let query = db('game_scores as gs')
       .join('users as u', 'gs.user_id', 'u.id')
       .where('gs.game_id', gameId)
       .andWhere('gs.result', 'win')
@@ -99,10 +108,15 @@ class GameScore {
         db.raw('MIN(gs.moves_count) as best_moves'),
         db.raw('COUNT(gs.id) as wins'),
         db.raw('MAX(gs.created_at) as last_win_at'),
-      )
-      .orderBy('best_moves', 'asc')
-      .orderBy('last_win_at', 'desc')
-      .limit(limit);
+      );
+
+    if (sort === 'wins') {
+      query = query.orderBy('wins', 'desc').orderBy('last_win_at', 'desc');
+    } else {
+      query = query.orderBy('best_moves', 'asc').orderBy('last_win_at', 'desc');
+    }
+
+    const rows = await query.limit(limit);
 
     // Add rank index
     return rows.map((row, index) => ({
