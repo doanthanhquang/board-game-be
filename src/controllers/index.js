@@ -5,6 +5,7 @@
 
 import { getHealth, getApiInfo } from './healthController.js';
 import { login } from './authController.js';
+import { getGames, getGameBySlug } from './gameController.js';
 
 export {
   // Health
@@ -12,4 +13,7 @@ export {
   getApiInfo,
   // Authentication
   login,
+  // Games
+  getGames,
+  getGameBySlug,
 };

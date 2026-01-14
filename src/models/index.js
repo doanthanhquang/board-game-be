@@ -5,5 +5,6 @@
 
 import { BaseModel } from './BaseModel.js';
 import User from './User.js';
+import { Game } from './Game.js';
 
-export { BaseModel, User };
+export { BaseModel, User, Game };
