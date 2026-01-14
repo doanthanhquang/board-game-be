@@ -8,10 +8,10 @@
     "dev": "node --env-file=.env src/index.js",
     "dev:watch": "nodemon --env-file=.env src/index.js",
     "start": "node --env-file=.env src/index.js",
-    "migrate:make": "node --env-file=.env --loader tsx node_modules/.bin/knex migrate:make --knexfile knexfile.js",
-    "migrate:latest": "node --env-file=.env --loader tsx node_modules/.bin/knex migrate:latest --knexfile knexfile.js",
-    "migrate:rollback": "node --env-file=.env --loader tsx node_modules/.bin/knex migrate:rollback --knexfile knexfile.js",
-    "migrate:status": "node --env-file=.env --loader tsx node_modules/.bin/knex migrate:status --knexfile knexfile.js"
+    "migrate:make": "node --env-file=.env node_modules/.bin/knex migrate:make --knexfile knexfile.js",
+    "migrate:latest": "node --env-file=.env node_modules/.bin/knex migrate:latest --knexfile knexfile.js",
+    "migrate:rollback": "node --env-file=.env node_modules/.bin/knex migrate:rollback --knexfile knexfile.js",
+    "migrate:status": "node --env-file=.env node_modules/.bin/knex migrate:status --knexfile knexfile.js"
   },
   "keywords": [
     "board-game",
