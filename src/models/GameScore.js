@@ -130,6 +130,69 @@ class GameScore {
       ...row,
     }));
   }
+
+  /**
+   * Get best scores for a user across all games
+   * @param {string} userId - User ID
+   * @returns {Promise<Array>} Array of best scores per game
+   */
+  static async getUserBestScores(userId) {
+    const scores = await db('game_scores as gs')
+      .join('games as g', 'gs.game_id', 'g.id')
+      .where('gs.user_id', userId)
+      .andWhere('gs.result', 'win')
+      .andWhere('g.is_enabled', true)
+      .whereNull('g.deleted_at')
+      .groupBy('g.id', 'g.name', 'g.slug')
+      .select(
+        'g.id as game_id',
+        'g.name as game_name',
+        'g.slug as game_slug',
+        db.raw('MIN(gs.moves_count) as best_moves'),
+        db.raw('MAX(gs.score) as best_score'),
+        db.raw('COUNT(gs.id) as wins'),
+      )
+      .orderBy('g.name', 'asc');
+
+    return scores;
+  }
+
+  /**
+   * Get total games played for a user
+   * @param {string} userId - User ID
+   * @returns {Promise<number>} Total number of game sessions
+   */
+  static async getTotalGamesPlayed(userId) {
+    const result = await db('game_sessions')
+      .where('user_id', userId)
+      .count('id as total')
+      .first();
+
+    return parseInt(result?.total || 0, 10);
+  }
+
+  /**
+   * Get win rate for a user
+   * @param {string} userId - User ID
+   * @returns {Promise<Object>} Object with total games, wins, and win rate percentage
+   */
+  static async getWinRate(userId) {
+    const totalGames = await this.getTotalGamesPlayed(userId);
+    const winsResult = await db('game_scores')
+      .where('user_id', userId)
+      .andWhere('result', 'win')
+      .count('id as wins')
+      .first();
+
+    const wins = parseInt(winsResult?.wins || 0, 10);
+    const winRate = totalGames > 0 ? ((wins / totalGames) * 100).toFixed(1) : 0;
+
+    return {
+      totalGames,
+      wins,
+      winRate: parseFloat(winRate),
+    };
+  }
 }
 
 export { GameScore };
