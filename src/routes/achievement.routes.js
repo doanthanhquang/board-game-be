@@ -11,8 +11,12 @@ import {
   checkAndUnlockAchievements,
 } from '../controllers/achievementController.js';
 import { authenticate } from '../middleware/auth.js';
+import { validateApiKey } from '../middleware/index.js';
 
 const router = express.Router();
+
+// Apply API key validation to all achievement routes
+router.use(validateApiKey);
 
 /**
  * GET /api/achievements

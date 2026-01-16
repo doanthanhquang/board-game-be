@@ -53,6 +53,9 @@ NODE_ENV=development
 # CORS Configuration  
 CORS_ORIGIN=*
 
+# API Key Configuration
+API_KEY=your-secret-api-key-here
+
 # Or use connection string (alternative)
 # DATABASE_URL=postgresql://postgres:password@db.xxxxx.supabase.co:5432/postgres
 ```
@@ -233,6 +236,7 @@ board-game-be/
 | `PORT` | Server port | `3001` |
 | `NODE_ENV` | Environment (development/production) | `development` |
 | `CORS_ORIGIN` | Allowed CORS origin | `*` |
+| `API_KEY` | API key for request authentication (required) | - |
 | `SUPABASE_DB_HOST` | Supabase database host | `localhost` |
 | `SUPABASE_DB_PORT` | Database port | `5432` |
 | `SUPABASE_DB_NAME` | Database name | `postgres` |
@@ -265,6 +269,7 @@ Error responses follow this format:
 
 ## 🔐 Security Features
 
+- **API Key Authentication**: All API endpoints (except health checks) require a valid API key in the `X-API-Key` header
 - Input sanitization to prevent XSS attacks
 - CORS configuration for cross-origin security
 - Request body size limits

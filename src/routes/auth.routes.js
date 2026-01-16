@@ -5,8 +5,12 @@
 
 import express from 'express';
 import { login, register } from '../controllers/authController.js';
+import { validateApiKey } from '../middleware/index.js';
 
 const router = express.Router();
+
+// Apply API key validation to all auth routes
+router.use(validateApiKey);
 
 /**
  * POST /api/auth/login

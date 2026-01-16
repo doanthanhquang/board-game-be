@@ -13,6 +13,7 @@ import {
 } from './validator.js';
 import { authenticate } from './auth.js';
 import { requireRole } from './role.js';
+import { validateApiKey } from './apiKey.js';
 
 export {
   // Error handling
@@ -30,4 +31,5 @@ export {
   // Auth
   authenticate,
   requireRole,
+  validateApiKey,
 };

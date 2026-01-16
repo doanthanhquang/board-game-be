@@ -11,8 +11,12 @@ import {
   markConversationRead,
 } from '../controllers/messageController.js';
 import { authenticate } from '../middleware/auth.js';
+import { validateApiKey } from '../middleware/index.js';
 
 const router = express.Router();
+
+// Apply API key validation to all message routes
+router.use(validateApiKey);
 
 /**
  * POST /api/messages

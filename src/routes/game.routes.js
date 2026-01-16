@@ -16,9 +16,12 @@ import {
   loadGameSave,
   clearGameSaves,
 } from '../controllers/gameController.js';
-import { authenticate, validateBodyNotEmpty } from '../middleware/index.js';
+import { authenticate, validateBodyNotEmpty, validateApiKey } from '../middleware/index.js';
 
 const router = express.Router();
+
+// Apply API key validation to all game routes
+router.use(validateApiKey);
 
 // GET /games - Get all enabled games
 router.get('/', getGames);
