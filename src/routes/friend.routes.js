@@ -21,38 +21,149 @@ const router = express.Router();
 router.use(validateApiKey);
 
 /**
- * GET /api/friends/search?q=query
- * Search users by name or email
+ * @swagger
+ * /api/friends/search:
+ *   get:
+ *     summary: Search users
+ *     description: Search users by name or email
+ *     tags: [Friends]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKey: []
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Search query (name or email)
+ *     responses:
+ *       200:
+ *         description: Users found
+ *       401:
+ *         description: Unauthorized
  */
 router.get('/search', authenticate, searchUsers);
 
 /**
- * POST /api/friends/requests
- * Send friend request
+ * @swagger
+ * /api/friends/requests:
+ *   post:
+ *     summary: Send friend request
+ *     description: Send a friend request to another user
+ *     tags: [Friends]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKey: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - userId
+ *             properties:
+ *               userId:
+ *                 type: integer
+ *                 description: ID of user to send friend request to
+ *     responses:
+ *       200:
+ *         description: Friend request sent successfully
+ *       400:
+ *         description: Invalid request
+ *       401:
+ *         description: Unauthorized
  */
 router.post('/requests', authenticate, sendFriendRequest);
 
 /**
- * GET /api/friends/requests
- * List pending friend requests (sent and received)
+ * @swagger
+ * /api/friends/requests:
+ *   get:
+ *     summary: List friend requests
+ *     description: List pending friend requests (sent and received)
+ *     tags: [Friends]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKey: []
+ *     responses:
+ *       200:
+ *         description: Friend requests retrieved successfully
+ *       401:
+ *         description: Unauthorized
  */
 router.get('/requests', authenticate, getFriendRequests);
 
 /**
- * PUT /api/friends/requests/:id/accept
- * Accept friend request
+ * @swagger
+ * /api/friends/requests/{id}/accept:
+ *   put:
+ *     summary: Accept friend request
+ *     description: Accept a pending friend request
+ *     tags: [Friends]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKey: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Friend request ID
+ *     responses:
+ *       200:
+ *         description: Friend request accepted successfully
+ *       404:
+ *         description: Friend request not found
+ *       401:
+ *         description: Unauthorized
  */
 router.put('/requests/:id/accept', authenticate, acceptFriendRequest);
 
 /**
- * DELETE /api/friends/requests/:id
- * Reject or cancel friend request
+ * @swagger
+ * /api/friends/requests/{id}:
+ *   delete:
+ *     summary: Reject or cancel friend request
+ *     description: Reject a received friend request or cancel a sent friend request
+ *     tags: [Friends]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKey: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Friend request ID
+ *     responses:
+ *       200:
+ *         description: Friend request rejected/cancelled successfully
+ *       404:
+ *         description: Friend request not found
+ *       401:
+ *         description: Unauthorized
  */
 router.delete('/requests/:id', authenticate, rejectFriendRequest);
 
 /**
- * GET /api/friends
- * List accepted friends
+ * @swagger
+ * /api/friends:
+ *   get:
+ *     summary: List friends
+ *     description: List accepted friends for the authenticated user
+ *     tags: [Friends]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKey: []
+ *     responses:
+ *       200:
+ *         description: Friends list retrieved successfully
+ *       401:
+ *         description: Unauthorized
  */
 router.get('/', authenticate, getFriends);
 

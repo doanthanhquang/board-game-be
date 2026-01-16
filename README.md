@@ -6,6 +6,7 @@ A RESTful API backend for a board game application built with Express.js and MVC
 
 - **MVC Architecture**: Clean separation of Models, Controllers, and Routes
 - **RESTful API**: Standard HTTP methods and status codes
+- **Interactive API Documentation**: Swagger UI with automatic documentation generation
 - **Database Integration**: Knex.js query builder with Supabase PostgreSQL
 - **Database Migrations**: Version-controlled schema management
 - **CORS Support**: Configurable cross-origin resource sharing
@@ -80,6 +81,28 @@ npm start
 The server will start without auto-restart.
 
 ## 📚 API Documentation
+
+### Interactive API Documentation (Swagger)
+
+The API includes interactive Swagger UI documentation that provides:
+- Complete endpoint documentation with request/response schemas
+- Interactive API testing directly from the browser
+- Authentication support for testing protected endpoints
+
+**Access Swagger UI:**
+- URL: `http://localhost:3001/api-docs`
+- **Authentication Required**: You must be logged in (JWT Bearer token) and provide a valid API key to access the documentation
+
+**How to Use:**
+1. Log in to the application to obtain a JWT token
+2. Navigate to `/api-docs` in your browser
+3. Click the "Authorize" button in Swagger UI
+4. Enter your JWT token in the `bearerAuth` field (format: `Bearer <your-token>`)
+5. Enter your API key in the `apiKey` field
+6. Click "Authorize" to authenticate
+7. You can now test API endpoints directly from the Swagger UI
+
+**Note**: The Swagger UI route is protected with both JWT authentication and API key validation for security.
 
 ### Base URL
 ```

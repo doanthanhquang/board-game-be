@@ -11,11 +11,15 @@ import friendRoutes from './friend.routes.js';
 import profileRoutes from './profile.routes.js';
 import messageRoutes from './message.routes.js';
 import achievementRoutes from './achievement.routes.js';
+import apiDocsRoutes from './api-docs.routes.js';
 
 const router = express.Router();
 
 // Mount health routes
 router.use('/', healthRoutes);
+
+// Mount API documentation routes
+router.use('/api-docs', apiDocsRoutes);
 
 // Mount authentication routes
 router.use('/api/auth', authRoutes);

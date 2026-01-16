@@ -19,26 +19,108 @@ const router = express.Router();
 router.use(validateApiKey);
 
 /**
- * POST /api/messages
- * Send a message to a friend
+ * @swagger
+ * /api/messages:
+ *   post:
+ *     summary: Send message
+ *     description: Send a message to a friend
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKey: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - recipientId
+ *               - content
+ *             properties:
+ *               recipientId:
+ *                 type: integer
+ *                 description: ID of message recipient
+ *               content:
+ *                 type: string
+ *                 description: Message content
+ *     responses:
+ *       200:
+ *         description: Message sent successfully
+ *       400:
+ *         description: Invalid request
+ *       401:
+ *         description: Unauthorized
  */
 router.post('/', authenticate, sendMessage);
 
 /**
- * GET /api/messages/conversations
- * List all conversations with unread status
+ * @swagger
+ * /api/messages/conversations:
+ *   get:
+ *     summary: List conversations
+ *     description: List all conversations with unread status
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKey: []
+ *     responses:
+ *       200:
+ *         description: Conversations retrieved successfully
+ *       401:
+ *         description: Unauthorized
  */
 router.get('/conversations', authenticate, getConversations);
 
 /**
- * GET /api/messages/conversations/:userId
- * Get conversation messages with a specific user
+ * @swagger
+ * /api/messages/conversations/{userId}:
+ *   get:
+ *     summary: Get conversation
+ *     description: Get conversation messages with a specific user
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKey: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: User ID of conversation partner
+ *     responses:
+ *       200:
+ *         description: Conversation messages retrieved successfully
+ *       404:
+ *         description: Conversation not found
+ *       401:
+ *         description: Unauthorized
  */
 router.get('/conversations/:userId', authenticate, getConversation);
 
 /**
- * PUT /api/messages/conversations/:userId/read
- * Mark conversation as read
+ * @swagger
+ * /api/messages/conversations/{userId}/read:
+ *   put:
+ *     summary: Mark conversation as read
+ *     description: Mark all messages in a conversation as read
+ *     tags: [Messages]
+ *     security:
+ *       - bearerAuth: []
+ *       - apiKey: []
+ *     parameters:
+ *       - in: path
+ *         name: userId
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: User ID of conversation partner
+ *     responses:
+ *       200:
+ *         description: Conversation marked as read
+ *       401:
+ *         description: Unauthorized
  */
 router.put('/conversations/:userId/read', authenticate, markConversationRead);
 
