@@ -1,0 +1,31 @@
+openapi: 3.0.0
+info:
+  title: Board Game API
+  version: 1.0.0
+  description: RESTful API for board game application with authentication and game management
+
+servers:
+  - url: /
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    apiKey:
+      type: apiKey
+      in: header
+      name: X-API-Key
+
+security:
+  - bearerAuth: []
+    apiKey: []
+
+paths:
+  /api/health:
+    get:
+      summary: Health check
+      responses:
+        "200":
+          description: OK

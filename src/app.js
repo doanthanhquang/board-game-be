@@ -8,6 +8,7 @@ import cors from "cors";
 import { corsConfig } from "./config/index.js";
 import { logger, errorHandler, notFoundHandler } from "./middleware/index.js";
 import routes from "./routes/index.js";
+import { swaggerSpec } from "./config/index.js";
 
 // Create Express application
 const app = express();
@@ -21,7 +22,9 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 
 // 3. Custom middleware
 app.use(logger);
-
+app.get("/openapi.json", (_req, res) => {
+  res.json(swaggerSpec);
+});
 // 5. Routes
 app.use("/", routes);
 
