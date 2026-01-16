@@ -8,8 +8,6 @@ import cors from "cors";
 import { corsConfig } from "./config/index.js";
 import { logger, errorHandler, notFoundHandler } from "./middleware/index.js";
 import routes from "./routes/index.js";
-import swaggerUi from "swagger-ui-express";
-import swaggerSpec from "./config/swagger.js";
 
 // Create Express application
 const app = express();
