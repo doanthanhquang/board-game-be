@@ -10,5 +10,6 @@ import { GameScore } from './GameScore.js';
 import { GameRating } from './GameRating.js';
 import { GameSession } from './GameSession.js';
 import { GameSave } from './GameSave.js';
+import Message from './Message.js';
 
-export { BaseModel, User, Game, GameScore, GameRating, GameSession, GameSave };
+export { BaseModel, User, Game, GameScore, GameRating, GameSession, GameSave, Message };
