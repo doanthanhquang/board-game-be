@@ -10,8 +10,8 @@ import { authenticate, validateApiKey } from '../middleware/index.js';
 
 const router = express.Router();
 
-router.use(swaggerUi.serve);
 router.get("/", (req, res) => res.redirect(301, "./"));
+router.use(swaggerUi.serve);
 
 /**
  * GET /api-docs

@@ -24,13 +24,6 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 // 3. Custom middleware
 app.use(logger);
 
-// 4. Swagger UI middleware
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
-
-app.get("/openapi.json", (_req, res) => {
-  res.json(swaggerSpec);
-});
-
 // 5. Routes
 app.use("/", routes);
 
