@@ -5,16 +5,16 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "dev": "node --env-file=.env src/index.js",
-    "dev:watch": "nodemon --env-file=.env src/index.js",
-    "start": "node --env-file=.env src/index.js",
-    "migrate:make": "node --env-file=.env node_modules/.bin/knex migrate:make --knexfile knexfile.js",
-    "migrate:latest": "node --env-file=.env node_modules/.bin/knex migrate:latest --knexfile knexfile.js",
-    "migrate:rollback": "node --env-file=.env node_modules/.bin/knex migrate:rollback --knexfile knexfile.js",
-    "migrate:status": "node --env-file=.env node_modules/.bin/knex migrate:status --knexfile knexfile.js",
-    "seed:make": "node --env-file=.env node_modules/.bin/knex seed:make --knexfile knexfile.js",
-    "seed:run": "node --env-file=.env node_modules/.bin/knex seed:run --knexfile knexfile.js",
-    "seed:one": "node --env-file=.env src/db/seeds/run-seed.js"
+    "dev": "node src/index.js",
+    "dev:watch": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "migrate:make": "node node_modules/.bin/knex migrate:make --knexfile knexfile.js",
+    "migrate:latest": "node node_modules/.bin/knex migrate:latest --knexfile knexfile.js",
+    "migrate:rollback": "node node_modules/.bin/knex migrate:rollback --knexfile knexfile.js",
+    "migrate:status": "node node_modules/.bin/knex migrate:status --knexfile knexfile.js",
+    "seed:make": "node node_modules/.bin/knex seed:make --knexfile knexfile.js",
+    "seed:run": "node node_modules/.bin/knex seed:run --knexfile knexfile.js",
+    "seed:one": "node src/db/seeds/run-seed.js"
   },
   "keywords": [
     "board-game",
