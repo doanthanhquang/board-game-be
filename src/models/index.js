@@ -11,5 +11,18 @@ import { GameRating } from './GameRating.js';
 import { GameSession } from './GameSession.js';
 import { GameSave } from './GameSave.js';
 import Message from './Message.js';
+import Achievement from './Achievement.js';
+import UserAchievement from './UserAchievement.js';
 
-export { BaseModel, User, Game, GameScore, GameRating, GameSession, GameSave, Message };
+export {
+  BaseModel,
+  User,
+  Game,
+  GameScore,
+  GameRating,
+  GameSession,
+  GameSave,
+  Message,
+  Achievement,
+  UserAchievement,
+};

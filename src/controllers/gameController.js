@@ -5,6 +5,7 @@
 
 import { Game, GameScore, GameRating, GameSession, GameSave } from '../models/index.js';
 import { withTransaction, formatDatabaseError } from '../db/utilities.js';
+import { checkAndUnlockAchievements } from './achievementController.js';
 
 /**
  * Get all enabled games
@@ -124,6 +125,32 @@ export const recordGameScore = async (req, res) => {
       movesCount: parsedMoves,
       result: 'win',
       sessionId: null,
+    });
+
+    // Check and unlock achievements (fire and forget - don't block response)
+    // Note: This is a simplified approach. In production, consider using a job queue
+    setImmediate(async () => {
+      try {
+        await checkAndUnlockAchievements(
+          {
+            user: req.user,
+            body: {
+              gameId: game.id,
+              score: parsedMoves,
+              action: 'score_recorded',
+            },
+          },
+          {
+            status: () => ({
+              json: () => ({}),
+            }),
+            json: () => ({}),
+          }
+        );
+      } catch (err) {
+        // Silently fail - achievements are not critical to score recording
+        console.error('Achievement check error:', err);
+      }
     });
 
     return res.status(201).json({

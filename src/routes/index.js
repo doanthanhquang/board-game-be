@@ -10,6 +10,7 @@ import gameRoutes from './game.routes.js';
 import friendRoutes from './friend.routes.js';
 import profileRoutes from './profile.routes.js';
 import messageRoutes from './message.routes.js';
+import achievementRoutes from './achievement.routes.js';
 
 const router = express.Router();
 
@@ -30,6 +31,9 @@ router.use('/api/profile', profileRoutes);
 
 // Mount message routes
 router.use('/api/messages', messageRoutes);
+
+// Mount achievement routes
+router.use('/api/achievements', achievementRoutes);
 
 // Future routes will be added here:
 // router.use('/api/v1/players', playerRoutes);

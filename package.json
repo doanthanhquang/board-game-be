@@ -13,7 +13,8 @@
     "migrate:rollback": "node --env-file=.env node_modules/.bin/knex migrate:rollback --knexfile knexfile.js",
     "migrate:status": "node --env-file=.env node_modules/.bin/knex migrate:status --knexfile knexfile.js",
     "seed:make": "node --env-file=.env node_modules/.bin/knex seed:make --knexfile knexfile.js",
-    "seed:run": "node --env-file=.env node_modules/.bin/knex seed:run --knexfile knexfile.js"
+    "seed:run": "node --env-file=.env node_modules/.bin/knex seed:run --knexfile knexfile.js",
+    "seed:one": "node --env-file=.env src/db/seeds/run-seed.js"
   },
   "keywords": [
     "board-game",
