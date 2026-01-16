@@ -18,7 +18,7 @@ router.use(
   "/",
   swaggerUi.serve,
   swaggerUi.setup(swaggerSpec, {
-    customCss: ".swagger-ui .topbar { display: none }",
+    customCssUrl: '/public/swagger-ui.css',
     customSiteTitle: "Board Game API Documentation",
   })
 );
