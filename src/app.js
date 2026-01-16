@@ -24,15 +24,22 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // 3. Custom middleware
 app.use(logger);
 
-app.use('/api-docs', swaggerUi.serveFiles(swaggerSpec), swaggerUi.setup(swaggerSpec));
+// 4. Swagger UI middleware
+app.use(
+    '/api-docs',
+    swaggerUi.serveFiles(swaggerSpec),
+    swaggerUi.setup(swaggerSpec, {
+      explorer: true, // có dropdown servers
+    })
+  );
 
-// 4. Routes
+// 5. Routes
 app.use('/', routes);
 
-// 5. 404 handler (must be after all routes)
+// 6. 404 handler (must be after all routes)
 app.use(notFoundHandler);
 
-// 6. Error handler (must be last)
+// 7. Error handler (must be last)
 app.use(errorHandler);
 
 export default app;
