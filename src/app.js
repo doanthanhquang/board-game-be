@@ -52,6 +52,21 @@ app.use(
 app.get("/openapi.json", (_req, res) => {
   res.json(swaggerSpec);
 });
+// Fix trailing slash for swagger assets ("/file.js/" -> "/file.js")
+app.use((req, res, next) => {
+  const swaggerAssets = [
+    "/swagger-ui-bundle.js/",
+    "/swagger-ui-standalone-preset.js/",
+    "/swagger-ui.css/",
+    "/swagger-ui-init.js/",
+  ];
+
+  if (swaggerAssets.includes(req.path)) {
+    return res.redirect(301, req.path.slice(0, -1)); // remove last "/"
+  }
+
+  next();
+});
 
 // 5. Routes
 app.use("/", routes);
