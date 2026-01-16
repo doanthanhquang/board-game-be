@@ -12,6 +12,7 @@ import {
   sanitizeInput,
 } from './validator.js';
 import { authenticate } from './auth.js';
+import { requireRole } from './role.js';
 
 export {
   // Error handling
@@ -28,4 +29,5 @@ export {
   sanitizeInput,
   // Auth
   authenticate,
+  requireRole,
 };
