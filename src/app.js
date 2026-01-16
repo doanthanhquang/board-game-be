@@ -25,47 +25,10 @@ app.use(express.urlencoded({ extended: true, limit: "10mb" }));
 app.use(logger);
 
 // 4. Swagger UI middleware
-app.use(
-  [
-    "/swagger-ui.css",
-    "/swagger-ui-bundle.js",
-    "/swagger-ui-standalone-preset.js",
-    "/swagger-ui.css.map",
-    "/swagger-ui-bundle.js.map",
-    "/swagger-ui-standalone-preset.js.map",
-    "/favicon-16x16.png",
-    "/favicon-32x32.png",
-  ],
-  swaggerUi.serve
-);
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-app.use(
-  "/api-docs",
-  swaggerUi.serve,
-  swaggerUi.setup(null, {
-    explorer: true,
-    swaggerOptions: {
-      url: "/openapi.json", // bạn đã có endpoint này OK rồi
-    },
-  })
-);
 app.get("/openapi.json", (_req, res) => {
   res.json(swaggerSpec);
-});
-// Fix trailing slash for swagger assets ("/file.js/" -> "/file.js")
-app.use((req, res, next) => {
-  const swaggerAssets = [
-    "/swagger-ui-bundle.js/",
-    "/swagger-ui-standalone-preset.js/",
-    "/swagger-ui.css/",
-    "/swagger-ui-init.js/",
-  ];
-
-  if (swaggerAssets.includes(req.path)) {
-    return res.redirect(301, req.path.slice(0, -1)); // remove last "/"
-  }
-
-  next();
 });
 
 // 5. Routes
