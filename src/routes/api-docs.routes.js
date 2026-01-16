@@ -1,24 +1,50 @@
-/**
- * API Documentation Routes
- * Serves Swagger UI for interactive API documentation
- */
+// /**
+//  * API Documentation Routes
+//  * Serves Swagger UI for interactive API documentation
+//  */
 
+// import express from "express";
+// import swaggerUi from "swagger-ui-express";
+// import { swaggerSpec } from "../config/index.js";
+
+// const router = express.Router();
+
+// /**
+//  * GET /api-docs
+//  * Serve Swagger UI documentation
+//  * Requires authentication (JWT Bearer token) and API key
+//  */
+// router.use(
+//   "/",
+//   swaggerUi.serve,
+//   swaggerUi.setup(swaggerSpec, {
+//     customSiteTitle: "Board Game API Documentation",
+//   })
+// );
+
+// export default router;
 import express from "express";
 import swaggerUi from "swagger-ui-express";
 import { swaggerSpec } from "../config/index.js";
 
 const router = express.Router();
 
-/**
- * GET /api-docs
- * Serve Swagger UI documentation
- * Requires authentication (JWT Bearer token) and API key
- */
+// ÉP trailing slash: /api-docs  -> /api-docs/
+router.use((req, res, next) => {
+  // Khi mount ở /api-docs, path "/" tương ứng đúng endpoint index
+  if (req.path === "/" && !req.originalUrl.endsWith("/")) {
+    return res.redirect(301, req.originalUrl + "/");
+  }
+  next();
+});
+
 router.use(
   "/",
   swaggerUi.serve,
   swaggerUi.setup(swaggerSpec, {
+    customCss: ".swagger-ui .topbar { display: none }",
     customSiteTitle: "Board Game API Documentation",
+    swaggerOptions: { persistAuthorization: true },
   })
 );
 
