@@ -26,12 +26,26 @@ app.use(logger);
 
 // 4. Swagger UI middleware
 app.use(
+  [
+    "/swagger-ui.css",
+    "/swagger-ui-bundle.js",
+    "/swagger-ui-standalone-preset.js",
+    "/swagger-ui.css.map",
+    "/swagger-ui-bundle.js.map",
+    "/swagger-ui-standalone-preset.js.map",
+    "/favicon-16x16.png",
+    "/favicon-32x32.png",
+  ],
+  swaggerUi.serve
+);
+
+app.use(
   "/api-docs",
   swaggerUi.serve,
   swaggerUi.setup(null, {
     explorer: true,
     swaggerOptions: {
-      url: "/openapi.json",
+      url: "/openapi.json", // bạn đã có endpoint này OK rồi
     },
   })
 );
