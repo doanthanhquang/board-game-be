@@ -4,6 +4,7 @@
  */
 
 import db from '../db/connection.js';
+import { normalizePagination, formatPaginationResponse } from '../db/pagination.js';
 
 /**
  * Game Model Class
@@ -21,6 +22,33 @@ class Game {
       .where({ is_enabled: true })
       .whereNull('deleted_at')
       .orderBy('name', 'asc');
+  }
+
+  /**
+   * Find all enabled games with pagination
+   * @param {number|string} page - Page number (1-based)
+   * @param {number|string} pageSize - Items per page
+   * @returns {Promise<Object>} Paginated response with items, page, pageSize, total
+   */
+  static async findAllEnabledPaginated(page = 1, pageSize = 20) {
+    const { page: safePage, pageSize: safePageSize, offset } = normalizePagination(page, pageSize, 20);
+
+    // Base query for filtering
+    const baseQuery = db(this.tableName)
+      .where({ is_enabled: true })
+      .whereNull('deleted_at');
+
+    // Get paginated games
+    const games = await baseQuery
+      .clone()
+      .orderBy('created_at', 'desc')
+      .limit(safePageSize)
+      .offset(offset);
+
+    // Get total count
+    const [{ count } = { count: 0 }] = await baseQuery.clone().count({ count: '*' });
+
+    return formatPaginationResponse(games, safePage, safePageSize, count);
   }
 
   /**

@@ -4,6 +4,7 @@
  */
 
 import db from '../db/connection.js';
+import { normalizePagination, formatPaginationResponse } from '../db/pagination.js';
 
 /**
  * Friend Model Class
@@ -177,6 +178,111 @@ class Friend {
     );
 
     return enrichedFriendships.filter((f) => f.friend !== null);
+  }
+
+  /**
+   * Get accepted friends for a user with pagination
+   * @param {string} userId - User ID
+   * @param {number|string} page - Page number (1-based)
+   * @param {number|string} pageSize - Items per page
+   * @returns {Promise<Object>} Paginated response with items, page, pageSize, total
+   */
+  static async getAcceptedFriendsPaginated(userId, page = 1, pageSize = 20) {
+    const { page: safePage, pageSize: safePageSize, offset } = normalizePagination(page, pageSize, 20);
+
+    // Base query for filtering
+    const baseQuery = db('friendships')
+      .where('status', 'accepted')
+      .where(function () {
+        this.where('requester_id', userId).orWhere('addressee_id', userId);
+      });
+
+    // Get paginated friendships
+    const friendships = await baseQuery
+      .clone()
+      .select('friendships.*')
+      .orderBy('accepted_at', 'desc')
+      .limit(safePageSize)
+      .offset(offset);
+
+    // Get total count
+    const [{ count } = { count: 0 }] = await baseQuery.clone().count({ count: '*' });
+
+    // Enrich with friend user details
+    const enrichedFriendships = await Promise.all(
+      friendships.map(async (friendship) => {
+        const friendId =
+          friendship.requester_id === userId
+            ? friendship.addressee_id
+            : friendship.requester_id;
+
+        const friendUser = await db('users')
+          .where({ id: friendId })
+          .whereNull('deleted_at')
+          .select('id', 'username', 'email', 'created_at')
+          .first();
+
+        return {
+          ...friendship,
+          friend: friendUser || null,
+        };
+      })
+    );
+
+    const items = enrichedFriendships.filter((f) => f.friend !== null);
+
+    return formatPaginationResponse(items, safePage, safePageSize, count);
+  }
+
+  /**
+   * Get pending friend requests for a user with pagination
+   * @param {string} userId - User ID
+   * @param {number|string} page - Page number (1-based)
+   * @param {number|string} pageSize - Items per page
+   * @returns {Promise<Object>} Paginated response with items, page, pageSize, total
+   */
+  static async getPendingRequestsPaginated(userId, page = 1, pageSize = 20) {
+    const { page: safePage, pageSize: safePageSize, offset } = normalizePagination(page, pageSize, 20);
+
+    // Base query for filtering
+    const baseQuery = db('friendships')
+      .where('status', 'pending')
+      .where(function () {
+        this.where('requester_id', userId).orWhere('addressee_id', userId);
+      });
+
+    // Get paginated requests
+    const requests = await baseQuery
+      .clone()
+      .select('friendships.*')
+      .orderBy('requested_at', 'desc')
+      .limit(safePageSize)
+      .offset(offset);
+
+    // Get total count
+    const [{ count } = { count: 0 }] = await baseQuery.clone().count({ count: '*' });
+
+    // Enrich with user details
+    const enrichedRequests = await Promise.all(
+      requests.map(async (request) => {
+        const isRequester = request.requester_id === userId;
+        const otherUserId = isRequester ? request.addressee_id : request.requester_id;
+
+        const otherUser = await db('users')
+          .where({ id: otherUserId })
+          .whereNull('deleted_at')
+          .select('id', 'username', 'email')
+          .first();
+
+        return {
+          ...request,
+          isRequester,
+          otherUser: otherUser || null,
+        };
+      })
+    );
+
+    return formatPaginationResponse(enrichedRequests, safePage, safePageSize, count);
   }
 }
 

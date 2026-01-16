@@ -82,12 +82,13 @@ const checkAchievementCriteria = async (criteria, userData) => {
 export const getAchievements = async (req, res) => {
   try {
     const userId = req.user.id;
+    const { page, pageSize } = req.query;
 
-    const achievements = await UserAchievement.getAchievementsWithUserStatus(userId);
+    const pagination = await UserAchievement.getAchievementsWithUserStatusPaginated(userId, page, pageSize);
 
     return res.status(200).json({
       success: true,
-      data: achievements,
+      data: pagination,
     });
   } catch (error) {
     console.error('Get achievements error:', error);
@@ -147,12 +148,13 @@ export const getAchievementById = async (req, res) => {
 export const getUserAchievements = async (req, res) => {
   try {
     const userId = req.user.id;
+    const { page, pageSize } = req.query;
 
-    const userAchievements = await UserAchievement.getUserAchievementsWithDetails(userId);
+    const pagination = await UserAchievement.getUserAchievementsWithDetailsPaginated(userId, page, pageSize);
 
     return res.status(200).json({
       success: true,
-      data: userAchievements,
+      data: pagination,
     });
   } catch (error) {
     console.error('Get user achievements error:', error);

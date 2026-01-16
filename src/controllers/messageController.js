@@ -143,13 +143,14 @@ export const getConversation = async (req, res) => {
 export const getConversations = async (req, res) => {
   try {
     const userId = req.user.id;
+    const { page, pageSize } = req.query;
 
-    // Get all conversations
-    const conversations = await Message.getConversations(userId);
+    // Get paginated conversations
+    const pagination = await Message.getConversationsPaginated(userId, page, pageSize);
 
     return res.status(200).json({
       success: true,
-      data: conversations,
+      data: pagination,
     });
   } catch (error) {
     console.error('Get conversations error:', error);

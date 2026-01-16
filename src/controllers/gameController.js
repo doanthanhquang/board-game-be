@@ -14,11 +14,13 @@ import { checkAndUnlockAchievements } from './achievementController.js';
  */
 export const getGames = async (req, res) => {
   try {
-    const games = await Game.findAllEnabled();
+    const { page, pageSize } = req.query;
+
+    const pagination = await Game.findAllEnabledPaginated(page, pageSize);
 
     return res.status(200).json({
       success: true,
-      data: games,
+      data: pagination,
     });
   } catch (error) {
     console.error('Get games error:', error);

@@ -138,12 +138,13 @@ export const sendFriendRequest = async (req, res) => {
 export const getFriendRequests = async (req, res) => {
   try {
     const userId = req.user.id;
+    const { page, pageSize } = req.query;
 
-    const requests = await Friend.getPendingRequests(userId);
+    const pagination = await Friend.getPendingRequestsPaginated(userId, page, pageSize);
 
     return res.status(200).json({
       success: true,
-      data: requests,
+      data: pagination,
     });
   } catch (error) {
     console.error('Get friend requests error:', error);
@@ -258,12 +259,13 @@ export const rejectFriendRequest = async (req, res) => {
 export const getFriends = async (req, res) => {
   try {
     const userId = req.user.id;
+    const { page, pageSize } = req.query;
 
-    const friendships = await Friend.getAcceptedFriends(userId);
+    const pagination = await Friend.getAcceptedFriendsPaginated(userId, page, pageSize);
 
     return res.status(200).json({
       success: true,
-      data: friendships,
+      data: pagination,
     });
   } catch (error) {
     console.error('Get friends error:', error);

@@ -4,6 +4,7 @@
  */
 
 import db from '../db/connection.js';
+import { normalizePagination, formatPaginationResponse } from '../db/pagination.js';
 
 /**
  * Message Model Class
@@ -170,6 +171,27 @@ class Message {
         if (!b.lastMessageAt) return -1;
         return new Date(b.lastMessageAt) - new Date(a.lastMessageAt);
       });
+  }
+
+  /**
+   * Get all conversations for a user with unread status (paginated)
+   * @param {string} userId - User ID
+   * @param {number|string} page - Page number (1-based)
+   * @param {number|string} pageSize - Items per page
+   * @returns {Promise<Object>} Paginated response with items, page, pageSize, total
+   */
+  static async getConversationsPaginated(userId, page = 1, pageSize = 10) {
+    const { page: safePage, pageSize: safePageSize } = normalizePagination(page, pageSize, 10);
+
+    // Get all conversations first (to get total count)
+    const allConversations = await this.getConversations(userId);
+    const total = allConversations.length;
+
+    // Apply pagination to sorted conversations
+    const offset = (safePage - 1) * safePageSize;
+    const paginatedConversations = allConversations.slice(offset, offset + safePageSize);
+
+    return formatPaginationResponse(paginatedConversations, safePage, safePageSize, total);
   }
 
   /**
