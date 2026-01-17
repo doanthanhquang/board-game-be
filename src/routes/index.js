@@ -13,6 +13,7 @@ import messageRoutes from './message.routes.js';
 import achievementRoutes from './achievement.routes.js';
 import apiDocsRoutes from './api-docs.routes.js';
 import userRoutes from './user.routes.js';
+import adminGameRoutes from './admin-game.routes.js';
 
 const router = express.Router();
 
@@ -42,6 +43,9 @@ router.use('/api/achievements', achievementRoutes);
 
 // Mount admin user routes
 router.use('/api/admin/users', userRoutes);
+
+// Mount admin game routes
+router.use('/api/admin/games', adminGameRoutes);
 
 // Future routes will be added here:
 // router.use('/api/v1/players', playerRoutes);

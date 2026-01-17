@@ -576,3 +576,180 @@ export const clearGameSaves = async (req, res) => {
     });
   }
 };
+
+/**
+ * List all games with pagination (admin only, includes disabled games)
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+export const listAllGames = async (req, res) => {
+  try {
+    const { page, pageSize, search } = req.query;
+
+    const pagination = await Game.findAllPaginated(page, pageSize, search);
+
+    return res.status(200).json({
+      success: true,
+      data: pagination,
+    });
+  } catch (error) {
+    console.error('List all games error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred while fetching games',
+    });
+  }
+};
+
+/**
+ * Get game by ID (admin only)
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+export const getGameById = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Game ID is required',
+      });
+    }
+
+    const game = await Game.findById(id);
+
+    if (!game) {
+      return res.status(404).json({
+        success: false,
+        message: 'Game not found',
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: game,
+    });
+  } catch (error) {
+    console.error('Get game by ID error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred while fetching game',
+    });
+  }
+};
+
+/**
+ * Update game configuration (admin only)
+ * @param {Object} req - Express request object
+ * @param {Object} res - Express response object
+ */
+export const updateGameConfig = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { default_board_width, default_board_height, default_time_limit, is_enabled } = req.body;
+
+    // Validate ID
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: 'Game ID is required',
+      });
+    }
+
+    // Check if game exists
+    const existingGame = await Game.findById(id);
+    if (!existingGame) {
+      return res.status(404).json({
+        success: false,
+        message: 'Game not found',
+      });
+    }
+
+    // Prepare update data - only allow specific fields
+    const updateData = {};
+
+    // Validate and add board width
+    if (default_board_width !== undefined) {
+      const width = Number(default_board_width);
+      if (Number.isNaN(width) || width < 3 || width > 50 || !Number.isInteger(width)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Board width must be an integer between 3 and 50',
+        });
+      }
+      updateData.default_board_width = width;
+    }
+
+    // Validate and add board height
+    if (default_board_height !== undefined) {
+      const height = Number(default_board_height);
+      if (Number.isNaN(height) || height < 3 || height > 50 || !Number.isInteger(height)) {
+        return res.status(400).json({
+          success: false,
+          message: 'Board height must be an integer between 3 and 50',
+        });
+      }
+      updateData.default_board_height = height;
+    }
+
+    // Validate and add time limit
+    if (default_time_limit !== undefined) {
+      if (default_time_limit === null) {
+        updateData.default_time_limit = null;
+      } else {
+        const timeLimit = Number(default_time_limit);
+        if (Number.isNaN(timeLimit) || timeLimit <= 0 || !Number.isInteger(timeLimit)) {
+          return res.status(400).json({
+            success: false,
+            message: 'Time limit must be a positive integer (seconds) or null',
+          });
+        }
+        updateData.default_time_limit = timeLimit;
+      }
+    }
+
+    // Validate and add enabled status
+    if (is_enabled !== undefined) {
+      if (typeof is_enabled !== 'boolean') {
+        return res.status(400).json({
+          success: false,
+          message: 'is_enabled must be a boolean value',
+        });
+      }
+      updateData.is_enabled = is_enabled;
+    }
+
+    // Check for immutable fields in request
+    const immutableFields = ['name', 'slug', 'description', 'instructions', 'game_type', 'id', 'created_at', 'updated_at', 'created_by', 'deleted_at'];
+    const providedImmutableFields = Object.keys(req.body).filter((key) => immutableFields.includes(key));
+    if (providedImmutableFields.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `The following fields cannot be updated: ${providedImmutableFields.join(', ')}`,
+      });
+    }
+
+    // Check if there's anything to update
+    if (Object.keys(updateData).length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'No valid fields to update',
+      });
+    }
+
+    // Update game
+    const updatedGame = await Game.updateConfig(id, updateData);
+
+    return res.status(200).json({
+      success: true,
+      data: updatedGame,
+    });
+  } catch (error) {
+    console.error('Update game config error:', error);
+    return res.status(500).json({
+      success: false,
+      message: 'An error occurred while updating game configuration',
+    });
+  }
+};
