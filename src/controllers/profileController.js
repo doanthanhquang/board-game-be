@@ -17,6 +17,7 @@ import db from '../db/connection.js';
 export const getProfile = async (req, res) => {
   try {
     const userId = req.user.id;
+    const userRole = req.user.role;
 
     // Get user with profile
     const userWithProfile = await Profile.getUserWithProfile(userId);
@@ -28,32 +29,10 @@ export const getProfile = async (req, res) => {
       });
     }
 
-    // Get game statistics
-    const gameStats = await GameScore.getUserBestScores(userId);
-    const winRateData = await GameScore.getWinRate(userId);
-
-    // Get all enabled games to show which ones haven't been played
-    const allGames = await Game.findAllEnabled();
-    const gameStatsMap = new Map(gameStats.map((stat) => [stat.game_id, stat]));
-
-    // Combine all games with statistics
-    const gamesWithStats = allGames.map((game) => {
-      const stats = gameStatsMap.get(game.id);
-      return {
-        game_id: game.id,
-        game_name: game.name,
-        game_slug: game.slug,
-        best_moves: stats?.best_moves || null,
-        best_score: stats?.best_score || null,
-        wins: stats?.wins || 0,
-        has_played: !!stats,
-      };
-    });
-
     // Sanitize user data
     const sanitizedUser = User.sanitize(userWithProfile);
 
-    // Format response
+    // Format response - only include statistics for non-admin users
     const profileData = {
       user: {
         id: sanitizedUser.id,
@@ -71,13 +50,39 @@ export const getProfile = async (req, res) => {
         preferences: userWithProfile.preferences || null,
         updated_at: userWithProfile.profile_updated_at || null,
       },
-      statistics: {
+    };
+
+    // Only fetch and include statistics for non-admin users
+    if (userRole !== 'admin') {
+      // Get game statistics
+      const gameStats = await GameScore.getUserBestScores(userId);
+      const winRateData = await GameScore.getWinRate(userId);
+
+      // Get all enabled games to show which ones haven't been played
+      const allGames = await Game.findAllEnabled();
+      const gameStatsMap = new Map(gameStats.map((stat) => [stat.game_id, stat]));
+
+      // Combine all games with statistics
+      const gamesWithStats = allGames.map((game) => {
+        const stats = gameStatsMap.get(game.id);
+        return {
+          game_id: game.id,
+          game_name: game.name,
+          game_slug: game.slug,
+          best_moves: stats?.best_moves || null,
+          best_score: stats?.best_score || null,
+          wins: stats?.wins || 0,
+          has_played: !!stats,
+        };
+      });
+
+      profileData.statistics = {
         games: gamesWithStats,
         total_games_played: winRateData.totalGames,
         total_wins: winRateData.wins,
         win_rate: winRateData.winRate,
-      },
-    };
+      };
+    }
 
     return res.status(200).json({
       success: true,
