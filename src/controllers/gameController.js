@@ -95,6 +95,23 @@ export const recordGameScore = async (req, res) => {
       });
     }
 
+    const game = await Game.findBySlug(slug);
+
+    if (!game) {
+      return res.status(404).json({
+        success: false,
+        message: 'Game not found',
+      });
+    }
+
+    // Skip score recording for drawing game (no ranking/scoring)
+    if (game.game_type === 'drawing') {
+      return res.status(200).json({
+        success: true,
+        message: 'Score not recorded for drawing game',
+      });
+    }
+
     const parsedMoves = Number(movesCount);
     if (!parsedMoves || Number.isNaN(parsedMoves) || parsedMoves <= 0) {
       return res.status(400).json({
@@ -109,15 +126,6 @@ export const recordGameScore = async (req, res) => {
       return res.status(200).json({
         success: true,
         message: 'Score not recorded for non-winning result',
-      });
-    }
-
-    const game = await Game.findBySlug(slug);
-
-    if (!game) {
-      return res.status(404).json({
-        success: false,
-        message: 'Game not found',
       });
     }
 
@@ -365,7 +373,10 @@ export const saveGameState = async (req, res) => {
 
     const userId = req.user.id;
     const gameId = game.id;
-    const MAX_SAVES_PER_GAME = 5;
+    
+    // Different save limits based on game type
+    const isDrawing = game.game_type === 'drawing';
+    const MAX_SAVES_PER_GAME = isDrawing ? 50 : 5;
 
     const result = await withTransaction(async (trx) => {
       // Ensure we have an in-progress session for this user & game
@@ -383,9 +394,19 @@ export const saveGameState = async (req, res) => {
         session = await GameSession.updateState(session.id, gameState, trx);
       }
 
-      // Always keep only the latest save per user and game:
-      // delete previous saves before creating a new one
-      await GameSave.deleteByUserAndGame(userId, gameId, trx);
+      // Check current save count
+      const currentSaveCount = await GameSave.countByUserAndGame(userId, gameId, trx);
+      if (currentSaveCount >= MAX_SAVES_PER_GAME) {
+        throw new Error(
+          `Save limit reached. You can save up to ${MAX_SAVES_PER_GAME} ${isDrawing ? 'drawings' : 'games'}. Please delete old saves to make room.`
+        );
+      }
+
+      // For drawing: Allow multiple saves (don't delete previous saves)
+      // For other games: Delete previous saves before creating a new one
+      if (!isDrawing) {
+        await GameSave.deleteByUserAndGame(userId, gameId, trx);
+      }
 
       const name =
         typeof saveName === 'string' && saveName.trim().length > 0
