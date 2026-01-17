@@ -12,6 +12,7 @@ import profileRoutes from './profile.routes.js';
 import messageRoutes from './message.routes.js';
 import achievementRoutes from './achievement.routes.js';
 import apiDocsRoutes from './api-docs.routes.js';
+import userRoutes from './user.routes.js';
 
 const router = express.Router();
 
@@ -38,6 +39,9 @@ router.use('/api/messages', messageRoutes);
 
 // Mount achievement routes
 router.use('/api/achievements', achievementRoutes);
+
+// Mount admin user routes
+router.use('/api/admin/users', userRoutes);
 
 // Future routes will be added here:
 // router.use('/api/v1/players', playerRoutes);
