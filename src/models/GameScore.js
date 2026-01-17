@@ -36,12 +36,22 @@ class GameScore {
   /**
    * Get global ranking for a game.
    * Default sort is by minimal moves_count; can be overridden by sort parameter.
+   * For Caro games (caro-4, caro-5), default sort is by wins DESC, then best_moves ASC.
    * @param {string} gameId
    * @param {number} [limit=50]
    * @param {string} [sort='best_moves'] - 'best_moves' | 'wins' | 'best_score'
+   * @param {string} [gameSlug] - Optional game slug to determine if it's a Caro game
    * @returns {Promise<Array>}
    */
-  static async getGlobalRanking(gameId, limit = 50, sort = 'best_moves') {
+  static async getGlobalRanking(gameId, limit = 50, sort = 'best_moves', gameSlug = null) {
+    // Check if this is a Caro game
+    const isCaroGame = gameSlug === 'caro-4' || gameSlug === 'caro-5';
+    
+    // For Caro games, default to wins-based sorting
+    if (isCaroGame && sort === 'best_moves') {
+      sort = 'wins_then_moves';
+    }
+
     let query = db('game_scores as gs')
       .join('users as u', 'gs.user_id', 'u.id')
       .where('gs.game_id', gameId)
@@ -56,7 +66,10 @@ class GameScore {
         db.raw('MAX(gs.created_at) as last_win_at'),
       );
 
-    if (sort === 'wins') {
+    if (sort === 'wins_then_moves') {
+      // For Caro: wins DESC, then best_moves ASC (fewer moves = better)
+      query = query.orderBy('wins', 'desc').orderBy('best_moves', 'asc');
+    } else if (sort === 'wins') {
       query = query.orderBy('wins', 'desc').orderBy('last_win_at', 'desc');
     } else if (sort === 'best_score') {
       query = query.orderBy('best_score', 'desc').orderBy('last_win_at', 'desc');
@@ -76,14 +89,24 @@ class GameScore {
   /**
    * Get friends-only ranking for a game.
    * Default sort is by minimal moves_count; can be overridden by sort parameter.
+   * For Caro games (caro-4, caro-5), default sort is by wins DESC, then best_moves ASC.
    * Includes the current user in the results.
    * @param {string} gameId
    * @param {string} userId
    * @param {number} [limit=50]
    * @param {string} [sort='best_moves'] - 'best_moves' | 'wins' | 'best_score'
+   * @param {string} [gameSlug] - Optional game slug to determine if it's a Caro game
    * @returns {Promise<Array>}
    */
-  static async getFriendsRanking(gameId, userId, limit = 50, sort = 'best_moves') {
+  static async getFriendsRanking(gameId, userId, limit = 50, sort = 'best_moves', gameSlug = null) {
+    // Check if this is a Caro game
+    const isCaroGame = gameSlug === 'caro-4' || gameSlug === 'caro-5';
+    
+    // For Caro games, default to wins-based sorting
+    if (isCaroGame && sort === 'best_moves') {
+      sort = 'wins_then_moves';
+    }
+
     // Subquery to get friend ids (bidirectional)
     const friendIdsQuery = db('friendships')
       .where('status', 'accepted')
@@ -114,7 +137,10 @@ class GameScore {
         db.raw('MAX(gs.created_at) as last_win_at'),
       );
 
-    if (sort === 'wins') {
+    if (sort === 'wins_then_moves') {
+      // For Caro: wins DESC, then best_moves ASC (fewer moves = better)
+      query = query.orderBy('wins', 'desc').orderBy('best_moves', 'asc');
+    } else if (sort === 'wins') {
       query = query.orderBy('wins', 'desc').orderBy('last_win_at', 'desc');
     } else if (sort === 'best_score') {
       query = query.orderBy('best_score', 'desc').orderBy('last_win_at', 'desc');

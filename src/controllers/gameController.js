@@ -210,9 +210,9 @@ export const getGameRanking = async (req, res) => {
           message: 'Authentication required for friends ranking',
         });
       }
-      rankings = await GameScore.getFriendsRanking(game.id, req.user.id, undefined, sort);
+      rankings = await GameScore.getFriendsRanking(game.id, req.user.id, undefined, sort, game.slug);
     } else {
-      rankings = await GameScore.getGlobalRanking(game.id, undefined, sort);
+      rankings = await GameScore.getGlobalRanking(game.id, undefined, sort, game.slug);
     }
 
     return res.status(200).json({
